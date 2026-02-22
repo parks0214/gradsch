@@ -58,7 +58,7 @@ def main():
 
     # Feature/Label 분리
     # 1. Sequence Features (LSTM)
-    seq_cols = [c for c in df.columns if c.startswith("pkt_")]
+    seq_cols = [c for c in df.columns if c.startswith("pkt_") and c != "pkt_count"]
     X_seq_flat = df[seq_cols].values
     
     # [FIX] 입력 feature 개수 자동 계산 (20 * FEATURE_DIM)
