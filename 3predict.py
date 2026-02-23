@@ -282,6 +282,12 @@ def main(interface, window_sec=4):
             
             if sport in [53, 5353] or dport in [53, 5353]: pred = 0
             if (sport == 22 or dport == 22) and pred == 3: pred = 0
+            
+            # [NEW] Keep-Alive (pred=1)은 오직 웹(80, 443)에서만 탐지하도록 강제
+            if pred == 1 and not (sport in [80, 443] or dport in [80, 443]):
+                pred = 0 
+                # print(f"[DEBUG] Blocked non-web Keep-Alive on port {sport}/{dport}")
+                
             if sport == 5938 or dport == 5938:
                 pred = 4 
                 confidence = 1.0 

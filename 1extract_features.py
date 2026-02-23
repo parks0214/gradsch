@@ -87,10 +87,19 @@ def process_pcap(file_path, label, min_packets=3):
     data_rows = []
     STRIDE = SEQUENCE_LENGTH 
 
-    for sess_pkts in sessions.values():
+    for key, sess_pkts in sessions.items():
         if len(sess_pkts) < min_packets:
             continue
             
+        # [NEW] Port Filtering for Keep-Alive (label=1)
+        # Keep-Alive 패턴은 오직 HTTP(80) / HTTPS(443)에서만 학습하도록 제한
+        src_ip, src_port = key[0]
+        dst_ip, dst_port = key[1]
+        
+        if label == 1:
+            if not (src_port in [80, 443] or dst_port in [80, 443]):
+                continue # HTTP/HTTPS가 아니면 Keep-Alive로 학습하지 않음
+
         # [NEW] 세션의 방향성 기준이 될 Client IP 식별 (세션의 첫 번째 패킷 전송자)
         client_ip = sess_pkts[0][IP].src
         
@@ -139,6 +148,14 @@ def process_pcap(file_path, label, min_packets=3):
             
             duration = sum(val_iats)
             pkt_count = len(chunk)
+            
+            # [NEW] Data Cleansing for Normal Data (label=0)
+            # 정상 폴더(label=0)에 있는 파일 중, 실제 데이터 전송량이 너무 적다면
+            # 이는 정상적인 웹서핑이 아니라 백그라운드의 세션 유지(Keep-Alive) 패킷일 확률이 큼.
+            # 이런 데이터를 "정상"으로 학습하면 안 되므로 필터링함.
+            total_payload = sum(abs(p) for p in val_payloads)
+            if label == 0 and total_payload < 50:
+                continue # 정상 데이터 중 Keep-Alive 의심 패턴은 학습에서 제외
             
             stats = [p_mean, p_std, p_min, p_max, i_mean, i_std, i_min, i_max, duration, pkt_count]
             # ---------------------------------------------------
