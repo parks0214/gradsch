@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 DEFAULT_LABEL_DIR_MAP = {
     "pcap": 0,          # 일반
     "pcap_keepalive": 1, 
-    "pcap_stun": 2,
+    "pcap_strun": 2,
     "pcap_rdp": 3,
 }
 
@@ -181,8 +181,11 @@ def main():
     headers.extend(["p_mean", "p_std", "p_min", "p_max", "i_mean", "i_std", "i_min", "i_max", "duration", "pkt_count"])
     headers.append("label")
 
+    # 스크립트 실행 위치 기준으로 경로 변경
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+
     for dirname, label in DEFAULT_LABEL_DIR_MAP.items():
-        abs_dir = os.path.abspath(dirname)
+        abs_dir = os.path.join(script_dir, dirname)
         pcap_files = glob.glob(os.path.join(abs_dir, "*.pcap"))
         
         for path in pcap_files:
