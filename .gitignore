@@ -1,0 +1,13 @@
+# Data and models
+*.csv
+*.pth
+*.pkl
+*.pt
+
+# PCAP directories
+pcap/
+pcap_*/
+
+# Python caches
+__pycache__/
+*.pyc
